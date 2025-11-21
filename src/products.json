@@ -1,0 +1,24 @@
+[
+  {
+    "id": "",
+    "name": "Classic White Mug",
+    "price": 9.99,
+    "description": "A timeless white mug for everyday use.",
+    "stock": 150,
+    "category": "Mugs",
+    "thumbnails": "",
+    "code": "CWM001",
+    "status": true
+  },
+  {
+    "id": "2",
+    "name": "Travel Thermos",
+    "price": 19.99,
+    "description": "Keep your beverages hot or cold on the go.",
+    "stock": 80,
+    "category": "Thermos",
+    "thumbnails": "",
+    "code": "TT002",
+    "status": true
+  }
+]
