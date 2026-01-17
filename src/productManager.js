@@ -26,7 +26,7 @@ class ProductManager {
         JSON.stringify(products, null, 2),
         "utf-8"
       );
-      return products;
+      return product;
     } catch (error) {
       throw new Error("Error al añadir el nuevo producto: " + error.message);
     }
@@ -80,18 +80,17 @@ class ProductManager {
 
   async deleteProductById(pid) {
     try {
-      //recuperar los productos
       const products = await this.getProducts();
-
+      // Filtramos usando el ID tal cual (string UUID)
       const filteredProducts = products.filter((product) => product.id !== pid);
 
-      //guardamos los productos en el json
       await fs.writeFile(
         this.pathFile,
         JSON.stringify(filteredProducts, null, 2),
         "utf-8"
       );
-      return filteredProducts;
+
+      console.log(` Producto con ID "${pid}" eliminado.`);
     } catch (error) {
       throw new Error("Error al borrar un producto: " + error.message);
     }
