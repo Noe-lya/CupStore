@@ -6,3 +6,15 @@
     {{/each}}
   </ul>
 </div>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io(); //inicio la conexion con el cliente socket.on("welcome",
+  (data) => { console.log(data.greeting); }); //formulario const formChat =
+  document.getElementById("formChat"); const inputChat =
+  document.getElementById("inputChat"); const inputUsername =
+  document.getElementById("inputUsername");
+  formChat.addEventListener("submit",(e) => { e.preventDefault(); const message
+  = inputChat.value; const username =inputUsername.value; inputChat.value = "";
+  //emitimos un evento de nuevo mensaje al servidor socket.emit("newMessage", {
+  username, message }); });
+</script>

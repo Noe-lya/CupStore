@@ -1,0 +1,38 @@
+<h1>Productos</h1>
+
+<form method="GET">
+  <label>Categoría: <input name="query" value="{{query}}"></label>
+  <label>Orden:
+    <select name="sort">
+      <option value="">Sin orden</option>
+      <option value="asc" {{#if (eq sort "asc")}}selected{{/if}}>Precio ↑</option>
+      <option value="desc" {{#if (eq sort "desc")}}selected{{/if}}>Precio ↓</option>
+    </select>
+  </label>
+  <button type="submit">Filtrar</button>
+</form>
+
+<ul>
+  {{#each products}}
+    <li>
+      <strong>{{this.name}}</strong> - ${{this.price}} ({{this.category}})
+      <a href="/products/{{this.id}}">Ver detalles</a>
+      <form method="POST" style="display:inline;">
+        <button type="submit">Agregar al carrito</button>
+      </form>
+    </li>
+  {{/each}}
+</ul>
+
+<!-- Paginación -->
+<div>
+  {{#if hasPrevPage}}
+    <a href="/products?limit={{limit}}&page={{prevPage}}&sort={{sort}}&query={{query}}">← Anterior</a>
+  {{/if}}
+
+  Página {{currentPage}} de {{totalPages}}
+
+  {{#if hasNextPage}}
+    <a href="/products?limit={{limit}}&page={{nextPage}}&sort={{sort}}&query={{query}}">Siguiente →</a>
+  {{/if}}
+</div>

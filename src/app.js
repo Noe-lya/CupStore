@@ -29,7 +29,7 @@ app.use("/", viewsRouter);
 //websocket
 const pm = new ProductManager("./src/data/products.json");
 io.on("connection", (socket) => {
-  console.log("Nuevo cliente conectado");
+  console.log("Nuevo usuario conectado");
 
   socket.on("newProduct", async (productData) => {
     try {
