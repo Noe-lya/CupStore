@@ -3,8 +3,8 @@ import CartManager from "../cartManager.js";
 import ProductManager from "../productManager.js";
 
 const cartRouter = express.Router();
-const cm = new CartManager("./src/data/carts.json", "./src/data/products.json");
-const pm = new ProductManager("./src/data/products.json");
+const cm = new CartManager();
+const pm = new ProductManager();
 
 // Obtener carrito con productos "populados"
 cartRouter.get("/:cid", async (req, res) => {

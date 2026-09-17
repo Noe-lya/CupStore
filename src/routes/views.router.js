@@ -1,8 +1,10 @@
 import express from "express";
 import ProductManager from "../productManager.js";
+import CartManager from "../cartManager.js";
 
 const viewsRouter = express.Router();
-const pm = new ProductManager("./src/data/products.json");
+const pm = new ProductManager();
+const cm = new CartManager();
 
 viewsRouter.get("/", async (req, res) => {
   try {
@@ -86,9 +88,7 @@ viewsRouter.get("/products/:pid", async (req, res) => {
 viewsRouter.get("/carts/:cid", async (req, res) => {
   try {
     const { cid } = req.params;
-    const carts = await fs.readFile("./src/data/carts.json", "utf8");
-    const cartsData = JSON.parse(carts);
-    const cart = cartsData.find((c) => c.id === cid);
+    const cart = await cm.getCartById(cid).catch(() => null);
     if (!cart) return res.status(404).render("404");
 
     // Populate manual

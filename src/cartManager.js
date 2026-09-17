@@ -1,80 +1,65 @@
-import fs from "fs/promises";
-import crypto from "crypto";
+import { supabase } from "./config/supabaseClient.js";
+
+const TABLE = "carts";
+
+function toCart(row) {
+  return { id: row.id, products: row.products };
+}
 
 class CartManager {
-  constructor(cartsPath, productsPath) {
-    this.cartsPath = cartsPath;
-    this.productsPath = productsPath;
+  async getCarts() {
+    const { data, error } = await supabase.from(TABLE).select("*");
+    if (error) throw new Error("Error al leer los carritos: " + error.message);
+    return data.map(toCart);
   }
 
-  generateId() {
-    return crypto.randomUUID();
-  }
-
+  // Compatibilidad con el resto del código, que trabaja con el array completo de carritos
   async readCarts() {
-    try {
-      const data = await fs.readFile(this.cartsPath, "utf-8");
-      return JSON.parse(data);
-    } catch (error) {
-      if (error.code === "ENOENT") {
-        await fs.writeFile(this.cartsPath, "[]", "utf-8");
-        return [];
-      }
-      throw new Error("Error al leer los carritos: " + error.message);
-    }
-  }
-
-  async readProducts() {
-    try {
-      const data = await fs.readFile(this.productsPath, "utf-8");
-      return JSON.parse(data);
-    } catch (error) {
-      throw new Error("Error al leer los productos: " + error.message);
-    }
+    return this.getCarts();
   }
 
   async writeCarts(carts) {
-    await fs.writeFile(this.cartsPath, JSON.stringify(carts, null, 2), "utf-8");
-  }
-
-  // ✅ CORREGIDO: Métodos públicos requeridos
-  async getCarts() {
-    return await this.readCarts();
+    for (const cart of carts) {
+      const { error } = await supabase
+        .from(TABLE)
+        .update({ products: cart.products })
+        .eq("id", cart.id);
+      if (error) throw new Error("Error al guardar los carritos: " + error.message);
+    }
   }
 
   async getCartById(cid) {
-    const carts = await this.readCarts();
-    const cart = carts.find((cart) => cart.id === cid);
-    if (!cart) throw new Error("Carrito no encontrado");
-    return cart;
+    const { data, error } = await supabase
+      .from(TABLE)
+      .select("*")
+      .eq("id", cid)
+      .maybeSingle();
+
+    if (error || !data) throw new Error("Carrito no encontrado");
+    return toCart(data);
   }
 
   async createCart() {
-    const carts = await this.readCarts();
-    const newCart = {
-      id: this.generateId(),
-      products: [],
-    };
-    carts.push(newCart);
-    await this.writeCarts(carts);
-    return newCart;
+    const { data, error } = await supabase
+      .from(TABLE)
+      .insert({ products: [] })
+      .select()
+      .single();
+
+    if (error) throw new Error("Error al crear el carrito: " + error.message);
+    return toCart(data);
   }
 
   async addProductToCart(cid, pid) {
-    const carts = await this.readCarts();
-    const cartIndex = carts.findIndex((cart) => cart.id === cid);
+    const cart = await this.getCartById(cid);
 
-    if (cartIndex === -1) {
-      throw new Error("Carrito no encontrado");
-    }
+    const { data: product, error: productError } = await supabase
+      .from("products")
+      .select("id")
+      .eq("id", pid)
+      .maybeSingle();
+    if (productError || !product) throw new Error("Producto no encontrado");
 
-    const products = await this.readProducts();
-    const productExists = products.some((p) => p.id === pid);
-    if (!productExists) {
-      throw new Error("Producto no encontrado");
-    }
-
-    const cart = carts[cartIndex];
     const productInCartIndex = cart.products.findIndex(
       (item) => item.product === pid
     );
@@ -85,7 +70,12 @@ class CartManager {
       cart.products.push({ product: pid, quantity: 1 });
     }
 
-    await this.writeCarts(carts);
+    const { error } = await supabase
+      .from(TABLE)
+      .update({ products: cart.products })
+      .eq("id", cid);
+    if (error) throw new Error("Error al actualizar el carrito: " + error.message);
+
     return cart;
   }
 }

@@ -1,53 +1,70 @@
-// Conectamos WebSocket con el cliente
-const socket = io();
+const POLL_INTERVAL_MS = 4000;
+
+function renderProducts(products) {
+  const productsList = document.getElementById("productsList");
+  if (!productsList) return;
+
+  productsList.innerHTML = products
+    .map(
+      (p) => `
+        <li data-id="${p.id}">
+          ${p.name} - $${p.price}
+          <button class="delete-btn" data-id="${p.id}">Eliminar</button>
+        </li>
+      `
+    )
+    .join("");
+}
+
+async function fetchProducts() {
+  try {
+    const res = await fetch("/api/products");
+    const { payload } = await res.json();
+    renderProducts(payload);
+  } catch (error) {
+    console.error("Error al traer los productos:", error);
+  }
+}
 
 // --- Agregar producto ---
 const formNewProduct = document.getElementById("formNewProduct");
 if (formNewProduct) {
-  formNewProduct.addEventListener("submit", (e) => {
+  formNewProduct.addEventListener("submit", async (e) => {
     e.preventDefault();
     const formData = new FormData(formNewProduct);
-    const productData = {};
-    formData.forEach((value, key) => {
-      productData[key] = value;
-    });
-    socket.emit("newProduct", productData);
+    const productData = Object.fromEntries(formData.entries());
+    if (productData.price) productData.price = Number(productData.price);
+    productData.available = formData.get("available") === "on";
+
+    try {
+      await fetch("/api/products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(productData),
+      });
+      formNewProduct.reset();
+      fetchProducts();
+    } catch (error) {
+      console.error("Error al agregar el producto:", error);
+    }
   });
 }
 
-// --- Recibir nuevo producto y renderizarlo con data-id ---
-socket.on("productAdded", (newProduct) => {
-  const productsList = document.getElementById("productsList");
-  if (productsList && newProduct?.id != null) {
-    // ✅ Incluimos data-id en el <li> y en el botón
-    productsList.innerHTML += `
-      <li data-id="${newProduct.id}">
-        ${newProduct.name} - $${newProduct.price}
-        <button class="delete-btn" data-id="${newProduct.id}">Eliminar</button>
-      </li>
-    `;
-  }
-});
-
-// --- Eliminar producto (enviar ID como STRING) ---
-document.addEventListener("click", (e) => {
+// --- Eliminar producto ---
+document.addEventListener("click", async (e) => {
   if (e.target.classList.contains("delete-btn")) {
-    const productId = e.target.dataset.id; // 👈 ya es string
-    console.log("🗑️ Eliminar producto con ID (string):", productId);
-    socket.emit("deleteProduct", { id: productId }); // ✅ sin parseInt
+    const productId = e.target.dataset.id;
+    try {
+      await fetch(`/api/products/${productId}`, { method: "DELETE" });
+      fetchProducts();
+    } catch (error) {
+      console.error("Error al eliminar el producto:", error);
+    }
   }
 });
 
-// --- Eliminar del DOM ---
-socket.on("productDeleted", (productId) => {
-  console.log("🧹 Eliminando del DOM producto ID:", productId);
-  const li = document.querySelector(`li[data-id="${productId}"]`);
-  if (li) {
-    li.remove();
-    console.log(`Producto ${productId} eliminado del DOM`);
-  } else {
-    console.debug(
-      `Producto ${productId} no encontrado en el DOM (ya eliminado o no presente)`
-    );
-  }
-});
+// --- Polling: mantenemos la lista actualizada sin websockets ---
+if (document.getElementById("productsList")) {
+  fetchProducts();
+  setInterval(fetchProducts, POLL_INTERVAL_MS);
+}

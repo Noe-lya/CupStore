@@ -2,7 +2,7 @@ import express from "express";
 import ProductManager from "../productManager.js";
 
 const productsRouter = express.Router();
-const pm = new ProductManager("./src/data/products.json");
+const pm = new ProductManager();
 
 productsRouter.get("/", async (req, res) => {
   try {
@@ -49,6 +49,9 @@ productsRouter.get("/", async (req, res) => {
     const endIndex = startIndex + limitNum;
     const paginatedProducts = products.slice(startIndex, endIndex);
 
+    const hasPrevPage = pageNum > 1;
+    const hasNextPage = pageNum < totalPages;
+
     // Links
     const baseUrl = `${req.protocol}://${req.get("host")}${req.baseUrl}`;
     const prevLink = hasPrevPage
@@ -61,9 +64,6 @@ productsRouter.get("/", async (req, res) => {
           sort || ""
         }&query=${query || ""}`
       : null;
-
-    const hasPrevPage = pageNum > 1;
-    const hasNextPage = pageNum < totalPages;
 
     res.json({
       status: "success",
@@ -94,6 +94,27 @@ productsRouter.get("/:pid", async (req, res) => {
         .json({ status: "error", error: "Producto no encontrado" });
     }
     res.json({ status: "success", payload: product });
+  } catch (error) {
+    res.status(500).json({ status: "error", error: error.message });
+  }
+});
+
+// Crear producto
+productsRouter.post("/", async (req, res) => {
+  try {
+    const newProduct = await pm.addProduct(req.body);
+    res.status(201).json({ status: "success", payload: newProduct });
+  } catch (error) {
+    res.status(500).json({ status: "error", error: error.message });
+  }
+});
+
+// Eliminar producto
+productsRouter.delete("/:pid", async (req, res) => {
+  try {
+    const { pid } = req.params;
+    await pm.deleteProductById(pid);
+    res.json({ status: "success", message: "Producto eliminado" });
   } catch (error) {
     res.status(500).json({ status: "error", error: error.message });
   }

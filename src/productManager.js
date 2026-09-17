@@ -1,99 +1,68 @@
-import fs from "fs/promises";
-import crypto from "crypto";
+import { supabase } from "./config/supabaseClient.js";
+
+const TABLE = "products";
+
+// Convierte una fila de la tabla ({ id, data }) al formato plano que ya usa el resto de la app
+function toProduct(row) {
+  return { id: row.id, ...row.data };
+}
 
 class ProductManager {
-  constructor(pathFile) {
-    this.pathFile = pathFile;
-  }
-
-  generateNewId() {
-    return crypto.randomUUID();
-  }
-
   async addProduct(newProduct) {
-    try {
-      //recuperar los productos
-      const fileData = await fs.readFile(this.pathFile, "utf-8");
-      const products = JSON.parse(fileData);
+    const { data, error } = await supabase
+      .from(TABLE)
+      .insert({ data: newProduct })
+      .select()
+      .single();
 
-      const newId = this.generateNewId();
-      const product = { id: newId, ...newProduct };
-      products.push(product);
-
-      //guardamos los productos en el json
-      await fs.writeFile(
-        this.pathFile,
-        JSON.stringify(products, null, 2),
-        "utf-8"
-      );
-      return product;
-    } catch (error) {
-      throw new Error("Error al añadir el nuevo producto: " + error.message);
-    }
+    if (error) throw new Error("Error al añadir el nuevo producto: " + error.message);
+    return toProduct(data);
   }
 
   async getProducts() {
-    try {
-      //recuperar los productos
-      const fileData = await fs.readFile(this.pathFile, "utf-8");
-      const products = JSON.parse(fileData);
+    const { data, error } = await supabase
+      .from(TABLE)
+      .select("*")
+      .order("created_at", { ascending: true });
 
-      return products;
-    } catch (error) {
-      throw new Error("Error al traer los productos: " + error.message);
-    }
+    if (error) throw new Error("Error al traer los productos: " + error.message);
+    return data.map(toProduct);
   }
 
   async getProductById(pid) {
-    try {
-      const products = await this.getProducts();
-      const product = products.find((product) => product.id === pid);
-      return product || null;
-    } catch (error) {
-      throw new Error(
-        "Error al obtener el producto de ID: " + pid + error.message
-      );
+    const { data, error } = await supabase
+      .from(TABLE)
+      .select("*")
+      .eq("id", pid)
+      .maybeSingle();
+
+    if (error) {
+      throw new Error("Error al obtener el producto de ID: " + pid + error.message);
     }
+    return data ? toProduct(data) : null;
   }
 
   async setProductById(pid, updates) {
-    try {
-      //recuperar los productos
-      const products = await this.getProducts();
+    const existing = await this.getProductById(pid);
+    if (!existing) throw new Error("Producto no encontrado");
 
-      const indexProduct = products.findIndex((product) => product.id === pid);
-      if (indexProduct === -1) throw new Error("Producto no encontrado");
+    const { id, ...currentData } = existing;
+    const mergedData = { ...currentData, ...updates };
 
-      products[indexProduct] = { ...products[indexProduct], ...updates };
+    const { error } = await supabase
+      .from(TABLE)
+      .update({ data: mergedData })
+      .eq("id", pid);
 
-      //guardamos los productos en el json
-      await fs.writeFile(
-        this.pathFile,
-        JSON.stringify(products, null, 2),
-        "utf-8"
-      );
-      return products;
-    } catch (error) {
-      throw new Error("Error al actualizar un producto: " + error.message);
-    }
+    if (error) throw new Error("Error al actualizar un producto: " + error.message);
+    return this.getProducts();
   }
 
   async deleteProductById(pid) {
-    try {
-      const products = await this.getProducts();
-      // Filtramos usando el ID tal cual (string UUID)
-      const filteredProducts = products.filter((product) => product.id !== pid);
+    const { error } = await supabase.from(TABLE).delete().eq("id", pid);
 
-      await fs.writeFile(
-        this.pathFile,
-        JSON.stringify(filteredProducts, null, 2),
-        "utf-8"
-      );
-
-      console.log(` Producto con ID "${pid}" eliminado.`);
-    } catch (error) {
-      throw new Error("Error al borrar un producto: " + error.message);
-    }
+    if (error) throw new Error("Error al borrar un producto: " + error.message);
+    console.log(` Producto con ID "${pid}" eliminado.`);
   }
 }
 

@@ -1,20 +1,21 @@
 <div>
   <h1>Home Page</h1>
-  <ul>
+
+  <form id="formNewProduct">
+    <input type="text" name="name" placeholder="Nombre" required>
+    <input type="number" name="price" placeholder="Precio" step="0.01" required>
+    <input type="text" name="category" placeholder="Categoría">
+    <label><input type="checkbox" name="available" checked> Disponible</label>
+    <button type="submit">Agregar producto</button>
+  </form>
+
+  <ul id="productsList">
     {{#each products}}
-      <li>{{this.name}} - ${{this.price}}</li>
+      <li data-id="{{this.id}}">
+        {{this.name}} - ${{this.price}}
+        <button class="delete-btn" data-id="{{this.id}}">Eliminar</button>
+      </li>
     {{/each}}
   </ul>
 </div>
-<script src="/socket.io/socket.io.js"></script>
-<script>
-  const socket = io(); //inicio la conexion con el cliente socket.on("welcome",
-  (data) => { console.log(data.greeting); }); //formulario const formChat =
-  document.getElementById("formChat"); const inputChat =
-  document.getElementById("inputChat"); const inputUsername =
-  document.getElementById("inputUsername");
-  formChat.addEventListener("submit",(e) => { e.preventDefault(); const message
-  = inputChat.value; const username =inputUsername.value; inputChat.value = "";
-  //emitimos un evento de nuevo mensaje al servidor socket.emit("newMessage", {
-  username, message }); });
-</script>
+<script src="/js/index.js"></script>
