@@ -23,3 +23,5 @@ public/
 supabase/
   schema.sql                 # script para crear las tablas de la base de datos
 ```
+## Vercel App 
+https://cup-store-steel.vercel.app/
