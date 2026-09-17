@@ -23,6 +23,7 @@ app.engine(
   engine({
     helpers: {
       eq: (a, b) => a === b,
+      currentYear: () => new Date().getFullYear(),
     },
   }),
 );

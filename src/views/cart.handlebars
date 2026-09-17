@@ -1,12 +1,17 @@
-<div>
-  <h1>Carrito {{cartId}}</h1>
-  <ul>
-    {{#each products}}
-      <li>
-        {{this.details.name}} - ${{this.details.price}} x {{this.quantity}}
-      </li>
-    {{else}}
-      <li>El carrito está vacío</li>
-    {{/each}}
-  </ul>
-</div>
+<section class="palette-section">
+  <div class="container">
+    <h1 class="section-title">Carrito {{cartId}}</h1>
+    <div class="products-grid">
+      {{#each products}}
+        <div class="product-card">
+          <div class="product-info">
+            <h3 class="product-title">{{this.details.name}}</h3>
+            <div class="product-price">${{this.details.price}} x {{this.quantity}}</div>
+          </div>
+        </div>
+      {{else}}
+        <p>El carrito está vacío</p>
+      {{/each}}
+    </div>
+  </div>
+</section>

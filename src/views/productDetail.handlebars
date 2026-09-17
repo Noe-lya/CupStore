@@ -1,7 +1,25 @@
-<div>
-  <a href="/products">← Volver</a>
-  <h1>{{product.name}}</h1>
-  <p>Categoría: {{product.category}}</p>
-  <p>Precio: ${{product.price}}</p>
-  <p>Disponible: {{#if product.available}}Sí{{else}}No{{/if}}</p>
-</div>
+<section class="palette-section">
+  <div class="container">
+    <a class="cta-button" href="/products">← Volver</a>
+    <div class="product-card" style="max-width: 400px; margin-top: 20px;">
+      <div class="product-img">
+        {{#if product.img}}
+          <img src="{{product.img}}" alt="{{product.name}}" class="product-image">
+        {{else}}
+          <i class="fas fa-mug-hot"></i>
+        {{/if}}
+      </div>
+      <div class="product-info">
+        {{#if product.category}}
+          <div class="product-category">{{product.category}}</div>
+        {{/if}}
+        <h1 class="product-title">{{product.name}}</h1>
+        {{#if product.description}}
+          <p>{{product.description}}</p>
+        {{/if}}
+        <div class="product-price">${{product.price}}</div>
+        <p>Disponible: {{#if product.available}}Sí{{else}}No{{/if}}</p>
+      </div>
+    </div>
+  </div>
+</section>

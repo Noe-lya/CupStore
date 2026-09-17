@@ -1,38 +1,49 @@
-<h1>Productos</h1>
+<section class="palette-section">
+  <div class="container">
+    <h1 class="section-title">Productos</h1>
 
-<form method="GET">
-  <label>Categoría: <input name="query" value="{{query}}"></label>
-  <label>Orden:
-    <select name="sort">
-      <option value="">Sin orden</option>
-      <option value="asc" {{#if (eq sort "asc")}}selected{{/if}}>Precio ↑</option>
-      <option value="desc" {{#if (eq sort "desc")}}selected{{/if}}>Precio ↓</option>
-    </select>
-  </label>
-  <button type="submit">Filtrar</button>
-</form>
+    <form method="GET" class="product-actions">
+      <input class="input" name="query" value="{{query}}" placeholder="Categoría">
+      <select class="input" name="sort">
+        <option value="">Sin orden</option>
+        <option value="asc" {{#if (eq sort "asc")}}selected{{/if}}>Precio ↑</option>
+        <option value="desc" {{#if (eq sort "desc")}}selected{{/if}}>Precio ↓</option>
+      </select>
+      <button class="cta-button" type="submit">Filtrar</button>
+    </form>
 
-<ul>
-  {{#each products}}
-    <li>
-      <strong>{{this.name}}</strong> - ${{this.price}} ({{this.category}})
-      <a href="/products/{{this.id}}">Ver detalles</a>
-      <form method="POST" style="display:inline;">
-        <button type="submit">Agregar al carrito</button>
-      </form>
-    </li>
-  {{/each}}
-</ul>
+    <div class="products-grid">
+      {{#each products}}
+        <div class="product-card">
+          <div class="product-img">
+            {{#if this.img}}
+              <img src="{{this.img}}" alt="{{this.name}}" class="product-image">
+            {{else}}
+              <i class="fas fa-mug-hot"></i>
+            {{/if}}
+          </div>
+          <div class="product-info">
+            {{#if this.category}}
+              <div class="product-category">{{this.category}}</div>
+            {{/if}}
+            <h3 class="product-title">{{this.name}}</h3>
+            <div class="product-price">${{this.price}}</div>
+            <a class="cta-button" href="/products/{{this.id}}">Ver detalles</a>
+          </div>
+        </div>
+      {{/each}}
+    </div>
 
-<!-- Paginación -->
-<div>
-  {{#if hasPrevPage}}
-    <a href="/products?limit={{limit}}&page={{prevPage}}&sort={{sort}}&query={{query}}">← Anterior</a>
-  {{/if}}
+    <div class="product-actions">
+      {{#if hasPrevPage}}
+        <a class="cta-button" href="/products?limit={{limit}}&page={{prevPage}}&sort={{sort}}&query={{query}}">← Anterior</a>
+      {{/if}}
 
-  Página {{currentPage}} de {{totalPages}}
+      <span>Página {{currentPage}} de {{totalPages}}</span>
 
-  {{#if hasNextPage}}
-    <a href="/products?limit={{limit}}&page={{nextPage}}&sort={{sort}}&query={{query}}">Siguiente →</a>
-  {{/if}}
-</div>
+      {{#if hasNextPage}}
+        <a class="cta-button" href="/products?limit={{limit}}&page={{nextPage}}&sort={{sort}}&query={{query}}">Siguiente →</a>
+      {{/if}}
+    </div>
+  </div>
+</section>

@@ -1,5 +1,11 @@
 const POLL_INTERVAL_MS = 4000;
 
+function escapeHtml(value) {
+  const div = document.createElement("div");
+  div.textContent = value ?? "";
+  return div.innerHTML;
+}
+
 function renderProducts(products) {
   const productsList = document.getElementById("productsList");
   if (!productsList) return;
@@ -7,10 +13,24 @@ function renderProducts(products) {
   productsList.innerHTML = products
     .map(
       (p) => `
-        <li data-id="${p.id}">
-          ${p.name} - $${p.price}
-          <button class="delete-btn" data-id="${p.id}">Eliminar</button>
-        </li>
+        <div class="product-card" data-id="${p.id}">
+          <div class="product-img">
+            ${
+              p.img
+                ? `<img src="${escapeHtml(p.img)}" alt="${escapeHtml(p.name)}" class="product-image">`
+                : `<i class="fas fa-mug-hot"></i>`
+            }
+          </div>
+          <div class="product-info">
+            ${p.category ? `<div class="product-category">${escapeHtml(p.category)}</div>` : ""}
+            <h3 class="product-title">${escapeHtml(p.name)}</h3>
+            ${p.description ? `<p>${escapeHtml(p.description)}</p>` : ""}
+            <div class="product-price">$${escapeHtml(p.price)}</div>
+            <div class="product-actions">
+              <button class="cta-button delete-btn" data-id="${p.id}">Eliminar</button>
+            </div>
+          </div>
+        </div>
       `
     )
     .join("");
@@ -34,6 +54,7 @@ if (formNewProduct) {
     const formData = new FormData(formNewProduct);
     const productData = Object.fromEntries(formData.entries());
     if (productData.price) productData.price = Number(productData.price);
+    if (productData.stock) productData.stock = Number(productData.stock);
     productData.available = formData.get("available") === "on";
 
     try {
