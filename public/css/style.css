@@ -449,3 +449,46 @@ footer {
   color: var(--color-highlight);
   margin-bottom: 15px;
 }
+
+/* Modal de confirmación */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(44, 62, 80, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: var(--transition);
+  z-index: 1000;
+}
+
+.modal-overlay.modal-visible {
+  opacity: 1;
+}
+
+.modal-box {
+  background-color: var(--color-white);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  padding: 30px;
+  max-width: 360px;
+  width: 90%;
+  text-align: center;
+  transform: translateY(-20px);
+  transition: var(--transition);
+}
+
+.modal-overlay.modal-visible .modal-box {
+  transform: translateY(0);
+}
+
+.modal-box p {
+  margin-bottom: 20px;
+  font-size: 18px;
+  color: var(--color-neutral-dark);
+}
+
+.modal-box .product-actions {
+  justify-content: center;
+}

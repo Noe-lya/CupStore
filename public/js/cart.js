@@ -12,6 +12,38 @@ function showToast(message, variant = "") {
   }, 2500);
 }
 
+function showConfirm(message) {
+  return new Promise((resolve) => {
+    const overlay = document.createElement("div");
+    overlay.className = "modal-overlay";
+    overlay.innerHTML = `
+      <div class="modal-box">
+        <p></p>
+        <div class="product-actions">
+          <button class="cta-button confirm-yes">Confirmar</button>
+          <button class="cta-button delete-btn confirm-no">Cancelar</button>
+        </div>
+      </div>
+    `;
+    overlay.querySelector("p").textContent = message;
+    document.body.appendChild(overlay);
+
+    requestAnimationFrame(() => overlay.classList.add("modal-visible"));
+
+    function close(result) {
+      overlay.classList.remove("modal-visible");
+      setTimeout(() => overlay.remove(), 200);
+      resolve(result);
+    }
+
+    overlay.querySelector(".confirm-yes").addEventListener("click", () => close(true));
+    overlay.querySelector(".confirm-no").addEventListener("click", () => close(false));
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) close(false);
+    });
+  });
+}
+
 function getStoredCartId() {
   try {
     return localStorage.getItem("cartId");
@@ -113,7 +145,8 @@ async function updateQuantity(cid, pid, action) {
 }
 
 async function checkout(cid) {
-  if (!confirm("¿Confirmar la compra?")) return;
+  const confirmed = await showConfirm("¿Confirmar la compra?");
+  if (!confirmed) return;
   try {
     await fetch(`/api/carts/${cid}`, { method: "DELETE" });
     clearStoredCartId();
@@ -151,7 +184,8 @@ document.addEventListener("click", async (e) => {
 
   const clearBtn = e.target.closest(".clear-cart-btn");
   if (clearBtn) {
-    if (!confirm("¿Vaciar todo el carrito?")) return;
+    const confirmed = await showConfirm("¿Vaciar todo el carrito?");
+    if (!confirmed) return;
     await fetch(`/api/carts/${clearBtn.dataset.cid}`, { method: "DELETE" });
     location.reload();
     return;
