@@ -1,17 +1,29 @@
 <section class="palette-section">
   <div class="container">
-    <h1 class="section-title">Carrito {{cartId}}</h1>
+    <h1 class="section-title">Tu carrito</h1>
     <div class="products-grid">
       {{#each products}}
         <div class="product-card">
           <div class="product-info">
             <h3 class="product-title">{{this.details.name}}</h3>
-            <div class="product-price">${{this.details.price}} x {{this.quantity}}</div>
+            <div class="product-price">${{this.details.price}} c/u</div>
+            <div class="product-actions">
+              <button class="cta-button qty-btn" data-cid="{{../cartId}}" data-pid="{{this.product}}" data-action="decrease">-</button>
+              <span>{{this.quantity}}</span>
+              <button class="cta-button qty-btn" data-cid="{{../cartId}}" data-pid="{{this.product}}" data-action="increase">+</button>
+              <button class="cta-button delete-btn remove-item-btn" data-cid="{{../cartId}}" data-pid="{{this.product}}">Eliminar</button>
+            </div>
           </div>
         </div>
       {{else}}
-        <p>El carrito está vacío</p>
+        <p>El carrito está vacío. <a class="cta-button" href="/products">Ver productos</a></p>
       {{/each}}
     </div>
+
+    {{#if products.length}}
+      <div class="product-actions">
+        <button class="cta-button delete-btn clear-cart-btn" data-cid="{{cartId}}">Vaciar carrito</button>
+      </div>
+    {{/if}}
   </div>
 </section>

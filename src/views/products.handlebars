@@ -28,7 +28,10 @@
             {{/if}}
             <h3 class="product-title">{{this.name}}</h3>
             <div class="product-price">${{this.price}}</div>
-            <a class="cta-button" href="/products/{{this.id}}">Ver detalles</a>
+            <div class="product-actions">
+              <a class="cta-button" href="/products/{{this.id}}">Ver detalles</a>
+              <button class="cta-button add-to-cart-btn" data-id="{{this.id}}">Agregar al carrito</button>
+            </div>
           </div>
         </div>
       {{/each}}

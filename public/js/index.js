@@ -27,6 +27,7 @@ function renderProducts(products) {
             ${p.description ? `<p>${escapeHtml(p.description)}</p>` : ""}
             <div class="product-price">$${escapeHtml(p.price)}</div>
             <div class="product-actions">
+              <button class="cta-button add-to-cart-btn" data-id="${p.id}">Agregar al carrito</button>
               <button class="cta-button delete-btn" data-id="${p.id}">Eliminar</button>
             </div>
           </div>

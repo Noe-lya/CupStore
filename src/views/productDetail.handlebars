@@ -19,6 +19,9 @@
         {{/if}}
         <div class="product-price">${{product.price}}</div>
         <p>Disponible: {{#if product.available}}Sí{{else}}No{{/if}}</p>
+        <div class="product-actions">
+          <button class="cta-button add-to-cart-btn" data-id="{{product.id}}">Agregar al carrito</button>
+        </div>
       </div>
     </div>
   </div>
