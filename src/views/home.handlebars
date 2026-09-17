@@ -7,24 +7,6 @@
 
 <section class="palette-section">
   <div class="container">
-    <div class="example-card">
-      <h2 class="example-title">Agregar producto</h2>
-      <form id="formNewProduct">
-        <input class="input" type="text" name="name" placeholder="Nombre" required>
-        <input class="input" type="number" name="price" placeholder="Precio" step="0.01" required>
-        <input class="input" type="text" name="category" placeholder="Categoría">
-        <input class="input" type="text" name="description" placeholder="Descripción">
-        <input class="input" type="text" name="img" placeholder="URL de imagen">
-        <input class="input" type="number" name="stock" placeholder="Stock">
-        <label><input type="checkbox" name="available" checked> Disponible</label>
-        <button class="cta-button" type="submit">Agregar producto</button>
-      </form>
-    </div>
-  </div>
-</section>
-
-<section class="palette-section">
-  <div class="container">
     <h2 class="section-title">Nuestros productos</h2>
     <div class="products-grid" id="productsList">
       {{#each products}}
@@ -47,7 +29,6 @@
             <div class="product-price">${{this.price}}</div>
             <div class="product-actions">
               <button class="cta-button add-to-cart-btn" data-id="{{this.id}}">Agregar al carrito</button>
-              <button class="cta-button delete-btn" data-id="{{this.id}}">Eliminar</button>
             </div>
           </div>
         </div>
