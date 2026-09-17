@@ -1,14 +1,18 @@
 import "dotenv/config";
+import path from "path";
+import { fileURLToPath } from "url";
 import express from "express";
 import {engine} from "express-handlebars";
 import productsRouter from "./routes/products.router.js";
 import viewsRouter from "./routes/views.router.js";
 import cartRouter from "./routes/cart.router.js";
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 const app = express();
 
 //habilitamos la carpeta public para archivos estaticos
-app.use(express.static("public"));
+app.use(express.static(path.join(__dirname, "..", "public")));
 //habilitamos poder recibir data desde formularios y JSON
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
@@ -23,7 +27,7 @@ app.engine(
   }),
 );
 app.set("view engine", "handlebars");
-app.set("views", "./src/views");
+app.set("views", path.join(__dirname, "views"));
 
 //endpoints
 app.use("/api/carts", cartRouter);
