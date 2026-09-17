@@ -100,7 +100,12 @@ viewsRouter.get("/carts/:cid", async (req, res) => {
       })
       .filter((item) => item.details); // solo si existe
 
-    res.render("cart", { cartId: cid, products: populatedProducts });
+    const cartTotal = populatedProducts.reduce(
+      (total, item) => total + item.details.price * item.quantity,
+      0
+    );
+
+    res.render("cart", { cartId: cid, products: populatedProducts, cartTotal });
   } catch (error) {
     res.status(500).render("error", { error: error.message });
   }

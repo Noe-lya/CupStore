@@ -1,3 +1,17 @@
+function showToast(message, variant = "") {
+  const toast = document.createElement("div");
+  toast.className = `toast ${variant ? `toast-${variant}` : ""}`.trim();
+  toast.textContent = message;
+  document.body.appendChild(toast);
+
+  requestAnimationFrame(() => toast.classList.add("toast-visible"));
+
+  setTimeout(() => {
+    toast.classList.remove("toast-visible");
+    setTimeout(() => toast.remove(), 300);
+  }, 2500);
+}
+
 function getStoredCartId() {
   try {
     return localStorage.getItem("cartId");
@@ -11,6 +25,14 @@ function setStoredCartId(id) {
     localStorage.setItem("cartId", id);
   } catch {
     // localStorage no disponible, seguimos sin persistir
+  }
+}
+
+function clearStoredCartId() {
+  try {
+    localStorage.removeItem("cartId");
+  } catch {
+    // localStorage no disponible
   }
 }
 
@@ -58,29 +80,50 @@ async function addToCart(productId) {
     const cartId = await ensureCartId();
     await fetch(`/api/carts/${cartId}/product/${productId}`, { method: "POST" });
     await refreshCartLink();
-    alert("Producto agregado al carrito");
+    showToast("Producto agregado al carrito", "success");
   } catch (error) {
     console.error("Error al agregar al carrito:", error);
-    alert("No se pudo agregar el producto al carrito");
+    showToast("No se pudo agregar el producto al carrito");
   }
 }
 
-async function updateQuantity(cid, pid, action) {
+async function setQuantity(cid, pid, quantity) {
+  const safeQuantity = Math.max(1, Math.floor(Number(quantity)) || 1);
   try {
-    const res = await fetch(`/api/carts/${cid}`);
-    const { payload } = await res.json();
-    const item = payload.products.find((p) => p.product.id === pid);
-    if (!item) return;
-
-    const quantity = Math.max(1, item.quantity + (action === "increase" ? 1 : -1));
     await fetch(`/api/carts/${cid}/products/${pid}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ quantity }),
+      body: JSON.stringify({ quantity: safeQuantity }),
     });
     location.reload();
   } catch (error) {
     console.error("Error al actualizar la cantidad:", error);
+    showToast("No se pudo actualizar la cantidad");
+  }
+}
+
+async function updateQuantity(cid, pid, action) {
+  const res = await fetch(`/api/carts/${cid}`);
+  const { payload } = await res.json();
+  const item = payload.products.find((p) => p.product.id === pid);
+  if (!item) return;
+
+  const quantity = item.quantity + (action === "increase" ? 1 : -1);
+  await setQuantity(cid, pid, quantity);
+}
+
+async function checkout(cid) {
+  if (!confirm("¿Confirmar la compra?")) return;
+  try {
+    await fetch(`/api/carts/${cid}`, { method: "DELETE" });
+    clearStoredCartId();
+    showToast("¡Gracias por tu compra!", "success");
+    setTimeout(() => {
+      window.location.href = "/";
+    }, 1800);
+  } catch (error) {
+    console.error("Error al finalizar la compra:", error);
+    showToast("No se pudo finalizar la compra");
   }
 }
 
@@ -111,6 +154,19 @@ document.addEventListener("click", async (e) => {
     if (!confirm("¿Vaciar todo el carrito?")) return;
     await fetch(`/api/carts/${clearBtn.dataset.cid}`, { method: "DELETE" });
     location.reload();
+    return;
+  }
+
+  const checkoutBtn = e.target.closest(".checkout-btn");
+  if (checkoutBtn) {
+    checkout(checkoutBtn.dataset.cid);
+  }
+});
+
+document.addEventListener("change", (e) => {
+  const qtyInput = e.target.closest(".qty-input");
+  if (qtyInput) {
+    setQuantity(qtyInput.dataset.cid, qtyInput.dataset.pid, qtyInput.value);
   }
 });
 
