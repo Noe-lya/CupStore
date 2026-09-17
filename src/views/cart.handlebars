@@ -1,0 +1,12 @@
+<div>
+  <h1>Carrito {{cartId}}</h1>
+  <ul>
+    {{#each products}}
+      <li>
+        {{this.details.name}} - ${{this.details.price}} x {{this.quantity}}
+      </li>
+    {{else}}
+      <li>El carrito está vacío</li>
+    {{/each}}
+  </ul>
+</div>
